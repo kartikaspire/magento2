@@ -4,7 +4,7 @@
         <tab id="aspire" translate="label" sortOrder="10">
             <label>Aspire Module</label>
         </tab>
-        <section id="module" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+        <section id="module" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
             <class>separator-top</class>
             <label>Aspire Admin Configuration</label>
             <tab>aspire</tab>
@@ -15,12 +15,16 @@
                     <label>Module Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="api_url" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="2">
+                <field id="api_url" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>API Endpoint</label>
                 </field>
-                <field id="pages" translate="label" type="multiselect" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="2">
+                <field id="pages" translate="label" type="multiselect" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>Pages to Block</label>
                     <source_model>Aspire\Module\Model\Config\Source\ConfigOption</source_model>
+                </field>
+                <field id="customer_group_list" translate="label" type="multiselect" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customer Groups to Block</label>
+                    <source_model>Aspire\Module\Model\Adminhtml\System\Config\Source\Customer\Group</source_model>
                 </field>
             </group>
         </section>
