@@ -65,23 +65,6 @@ class ApiResponse extends AbstractHelper {
     $customerDetail = $this->session->getData();
     $customer = $this->getCustomer($customerDetail['customer_id']);
     $this->_logger->info($customer->getEmail());
-    /*$URL = 'www.example.com';
-    $username = 'username';
-    $password = 'password';
-   
-    //set curl options
-    $this->curl->setOption(CURLOPT_USERPWD, $username . ":" . $password);
-    $this->curl->setOption(CURLOPT_HEADER, 0);
-    $this->curl->setOption(CURLOPT_TIMEOUT, 60);
-    $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
-    $this->curl->setOption(CURLOPT_CUSTOMREQUEST, 'GET');
-    //set curl header
-    $this->curl->addHeader("Content-Type", "application/json");
-    //get request with url
-    $this->curl->get($URL);
-    //read response
-    $response = $this->curl->getBody();
-    return $response;*/
   }
 
   public function getCustomer($id)
