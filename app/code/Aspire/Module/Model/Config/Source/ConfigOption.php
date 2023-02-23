@@ -10,10 +10,10 @@ class ConfigOption implements OptionSourceInterface
     public function toOptionArray()
     {
         return [
-            ['value' => '1', 'label' => __('Category')],
-            ['value' => '2', 'label' => __('Product Details')],
-            ['value' => '3', 'label' => __('Cart')],
-            ['value' => '4', 'label' => __('Checkout')]
+            ['value' => 'catalog_category_view', 'label' => __('Category')],
+            ['value' => 'catalog_product_view', 'label' => __('Product Details')],
+            ['value' => 'checkout_cart_index', 'label' => __('Cart')],
+            ['value' => 'checkout_index_index', 'label' => __('Checkout')]
         ];
     }
 }
