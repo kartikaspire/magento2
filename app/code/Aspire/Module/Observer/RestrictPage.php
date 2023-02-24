@@ -10,6 +10,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Serialize\SerializerInterface;
 use Aspire\Module\Helper\ApiResponse;
 use Magento\Framework\UrlInterface;
+use Magento\Framework\App\ResponseFactory;
 
 class RestrictPage implements ObserverInterface
 {
@@ -41,13 +42,19 @@ class RestrictPage implements ObserverInterface
      */
     protected $url;
 
+    /**
+     * @var \Magento\Framework\App\ResponseFactory
+     */
+    protected $responseFactory;
+
 	public function __construct(
       Logger $logger,
       Context $context,
       ScopeConfigInterface $scopeConfig,
       SerializerInterface $serializer,
       ApiResponse $apiResponse,
-      UrlInterface $url
+      UrlInterface $url,
+      ResponseFactory $responseFactory
     ) {
       $this->scopeConfig = $scopeConfig;
       $this->_logger = $logger;
@@ -56,6 +63,7 @@ class RestrictPage implements ObserverInterface
       $this->url = $url;
       $this->enableModule = $this->scopeConfig->getValue(self::XML_CONFIGURATION_ENABLE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
       $this->blockCustomerGroup = $this->scopeConfig->getValue(self::XML_CONFIGURATION_USER_GROUP_BLOCK, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+      $this->responseFactory = $responseFactory;
     }
 	/**
      * @param Observer $observer
@@ -73,7 +81,7 @@ class RestrictPage implements ObserverInterface
 		    		$fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
 		    		$customerGroupIdArray = explode(',', $this->blockCustomerGroup);
 		    		$customerGroupId = $this->apiResponse->getGroupId();
-			        if ((in_array($fullPageName, $pageOptionArray)) || in_array($customerGroupId, $customerGroupIdArray)) {
+			        if (in_array($fullPageName, $pageOptionArray) && in_array($customerGroupId, $customerGroupIdArray)) {
 			        	$redirectionUrl = $this->url->getUrl();
 		      			$redirectController = $observer->getControllerAction();
 				        $redirectController->getResponse()->setRedirect($redirectionUrl);

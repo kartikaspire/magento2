@@ -86,6 +86,7 @@ class ApiResponse extends AbstractHelper {
     $apiUrl = $this->scopeConfig->getValue(self::XML_CONFIGURATION_APIURL, $storeScope);
     $apiUsername = $this->scopeConfig->getValue(self::XML_API_USERNAME, $storeScope);
     $apiPassword = $this->scopeConfig->getValue(self::XML_API_PASSWORD, $storeScope);
+    
     if ($this->session->isLoggedIn()) {
       $customerDetail = $this->session->getData();
       $customer = $this->getCustomer($customerDetail['customer_id']);
