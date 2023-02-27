@@ -112,9 +112,9 @@ class ApiResponse extends AbstractHelper {
       $this->_logger->info($is_suspended);
       return $is_suspended;
     } else {
-      $resultRedirect = $this->resultRedirectFactory->create();
-      $resultRedirect->setPath('customer/account/login/');
-      return $resultRedirect;
+      //$resultRedirect = $this->resultRedirectFactory->create();
+      //$resultRedirect->setPath('customer/account/login/');
+      //return $resultRedirect;
     }
   }
 

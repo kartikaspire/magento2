@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
-        <job name="aspire_cron_setup_job" instance="Aspire\Module\Cron\HandleStatus" method="execute">
-            <config_path>crontab/default/jobs/aspire_cron_setup_job/schedule/cron_expr</config_path>
+        <job name="aspire_cron_group" instance="Aspire\Module\Cron\HandleStatus" method="execute">
+            <config_path>module/configurable_cron/time</config_path>
+            <!--<schedule>* * * * *</schedule>-->
         </job>
     </group>
 </config>
