@@ -10,16 +10,16 @@ class HandleStatus
      /**
       * @var Session
       */
-      protected $session;
-      proteched $customerRepositoryInterface;
+    protected $session;
+    protected $customerRepositoryInterface;
     public function __construct(
       ApiResponse $apiResponse,
       Session $session,
-      CustomerRepositoryInterface $customerRepositoryInterface;
+      CustomerRepositoryInterface $customerRepositoryInterface
     ) {
       $this->apiResponse = $apiResponse;
       $this->session = $session;
-      $this->customerRepositoryInterface = $customerRepositoryInterface
+      $this->customerRepositoryInterface = $customerRepositoryInterface;
     }
     public function execute()
     {
@@ -27,13 +27,17 @@ class HandleStatus
         $logger = new \Zend\Log\Logger();
         $logger->addWriter($writer);
         $logger->info('Cron job started');
-        $value = $this->apiResponse->getApiResponse();
-        if ($value) {
+        $logger->info('Cron job started-----');
+        $logger->info($this->apiResponse->getApiResponse());
+        return $this->apiResponse->getApiResponse();
+        
+        /*if ($value) {
             $customerDetail = $this->session->getData();
+            $logger->info(print_r($customerDetail, true));
             $customer = $this->customerRepositoryInterface->getById($customerDetail['customer_id']);
-            $customer->setData('customer_status', $value);
+            $customer->setData('customer_apistatus', $value);
             $customer->save();
-        }
+        }*/
 
     }
 }

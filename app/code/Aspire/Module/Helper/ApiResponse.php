@@ -108,9 +108,13 @@ class ApiResponse extends AbstractHelper {
       $this->_logger->info('API Response Log Here');
       $this->_logger->info(print_r($response, true));
       $data = json_decode($response, TRUE);
-      $is_suspended = $data['result']['user_info']['is_suspended'];
-      $this->_logger->info($is_suspended);
-      return $is_suspended;
+      $this->_logger->info(print_r($data, true));
+      if ($data){
+        $is_suspended = $data['result']['user_info']['is_suspended'];
+        $this->_logger->info('is_suspended');
+        $this->_logger->info($is_suspended);
+        return $is_suspended;
+      }
     } else {
       //$resultRedirect = $this->resultRedirectFactory->create();
       //$resultRedirect->setPath('customer/account/login/');
