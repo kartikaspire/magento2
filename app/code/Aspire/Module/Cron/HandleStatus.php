@@ -1,6 +1,7 @@
 <?php
 
 namespace Aspire\Module\Cron;
+
 use Aspire\Module\Helper\ApiResponse;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session;
@@ -28,9 +29,13 @@ class HandleStatus
         $logger->addWriter($writer);
         $logger->info('Cron job started');
         $logger->info('Cron job started-----');
-        $logger->info($this->apiResponse->getApiResponse());
-        return $this->apiResponse->getApiResponse();
+        //$logger->info($this->apiResponse->getApiResponse());
+        $linkField = $this->apiResponse->getApiResponse();
+        //$linkField = $this->apiResponse->getMetadataPool()->getMetadata(ApiResponse::class)->getApiResponse();
         
+        $logger->info('Cron job started+++++');
+        $logger->info($linkField);
+        //return $this;
         /*if ($value) {
             $customerDetail = $this->session->getData();
             $logger->info(print_r($customerDetail, true));

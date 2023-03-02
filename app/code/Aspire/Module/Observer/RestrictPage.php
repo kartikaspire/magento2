@@ -11,6 +11,7 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Aspire\Module\Helper\ApiResponse;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\App\ResponseFactory;
+use Magento\Customer\Model\Session;
 
 class RestrictPage implements ObserverInterface
 {
@@ -46,6 +47,10 @@ class RestrictPage implements ObserverInterface
      * @var \Magento\Framework\App\ResponseFactory
      */
     protected $responseFactory;
+    /**
+  	* @var Session
+  	*/
+  	protected $session;
 
 	public function __construct(
       Logger $logger,
@@ -54,13 +59,15 @@ class RestrictPage implements ObserverInterface
       SerializerInterface $serializer,
       ApiResponse $apiResponse,
       UrlInterface $url,
-      ResponseFactory $responseFactory
+      ResponseFactory $responseFactory,
+      Session $session
     ) {
       $this->scopeConfig = $scopeConfig;
       $this->_logger = $logger;
       $this->serializer = $serializer;
       $this->apiResponse = $apiResponse;
       $this->url = $url;
+      $this->session = $session;
       $this->enableModule = $this->scopeConfig->getValue(self::XML_CONFIGURATION_ENABLE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
       $this->blockCustomerGroup = $this->scopeConfig->getValue(self::XML_CONFIGURATION_USER_GROUP_BLOCK, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
       $this->responseFactory = $responseFactory;
@@ -76,7 +83,12 @@ class RestrictPage implements ObserverInterface
     			$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
 		    	$pageValue = $this->scopeConfig->getValue(self::XML_CONFIGURATION_BLOCK_PAGE, $storeScope);
 		    	$apiStatusValue = $this->apiResponse->getApiResponse();
-		    	if ($apiStatusValue == 0) {
+		    	$customerDetail = $this->session->getData();
+		    	$customerData = $this->apiResponse->getCustomer($customerDetail['customer_id']);
+		    	$admin_customer_status = $customerData->getCustomAttribute('customer_apistatus')->getValue();
+		    	$this->_logger->info('admin_customer_status');
+		    	$this->_logger->info($admin_customer_status);
+		    	if ($admin_customer_status == 0 || $apiStatusValue == 0) {
 		    		$pageOptionArray = explode(',', $pageValue);
 		    		$fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
 		    		$customerGroupIdArray = explode(',', $this->blockCustomerGroup);

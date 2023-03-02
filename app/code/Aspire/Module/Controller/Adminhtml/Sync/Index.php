@@ -11,6 +11,7 @@ use Magento\Ui\Component\MassAction\Filter;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Aspire\Module\Block\Adminhtml\ApiCall;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\Controller\ResultFactory;
 
 class Index extends Action
 {
@@ -45,15 +46,18 @@ class Index extends Action
     public function execute()
     {
         $collection = $this->filter->getCollection($this->CollectionFactory->create());
-
-        $count = 0;
         foreach ($collection as $child) {
-            $result = $this->apiCall->getApiCustomerStatus($child->getData('entity_id'));
-            $customer = $this->customerRepositoryInterface->getById($child->getData('entity_id'));
-            $customer->setData('customer_apistatus', $result);
-            $customer->save();
-            $count++;
+            if ($child->getData('entity_id')) {
+               $result = $this->apiCall->getApiCustomerStatus($child->getData('entity_id'));
+                $child->getData('entity_id');
+                $customer = $this->customerRepositoryInterface->getById($child->getData('entity_id'));
+                $customer->setCustomAttribute('customer_apistatus', $result);
+                $this->customerRepositoryInterface->save($customer); 
+            }
         }
-        exit;
+        $this->messageManager->addSuccess(__('Your Records Synchronized Successfully'));
+        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $resultRedirect->setUrl($this->_redirect->getRefererUrl());
+        return $resultRedirect;
     }
 }
