@@ -45,19 +45,23 @@ class Index extends Action
     }
     public function execute()
     {
-        $collection = $this->filter->getCollection($this->CollectionFactory->create());
-        foreach ($collection as $child) {
-            if ($child->getData('entity_id')) {
-               $result = $this->apiCall->getApiCustomerStatus($child->getData('entity_id'));
-                $child->getData('entity_id');
-                $customer = $this->customerRepositoryInterface->getById($child->getData('entity_id'));
-                $customer->setCustomAttribute('customer_apistatus', $result);
-                $this->customerRepositoryInterface->save($customer); 
+        try {
+            $collection = $this->filter->getCollection($this->CollectionFactory->create());
+            foreach ($collection as $child) {
+                if ($child->getData('entity_id')) {
+                   $result = $this->apiCall->getApiCustomerStatus($child->getData('entity_id'));
+                    $child->getData('entity_id');
+                    $customer = $this->customerRepositoryInterface->getById($child->getData('entity_id'));
+                    $customer->setCustomAttribute('customer_apistatus', $result);
+                    $this->customerRepositoryInterface->save($customer); 
+                }
             }
+            $this->messageManager->addSuccess(__('Your Records Synchronized Successfully'));
+            $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+            $resultRedirect->setUrl($this->_redirect->getRefererUrl());
+            return $resultRedirect;
+        } catch(Exception $e) {
+            echo 'Exception Message: ' . $e->getMessage();
         }
-        $this->messageManager->addSuccess(__('Your Records Synchronized Successfully'));
-        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($this->_redirect->getRefererUrl());
-        return $resultRedirect;
     }
 }
