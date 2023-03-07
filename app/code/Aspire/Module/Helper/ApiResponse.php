@@ -1,35 +1,48 @@
 <?php
+declare(strict_types=1);
 
 namespace Aspire\Module\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Aspire\Module\Logger\Logger;
 use Magento\Framework\App\Helper\Context;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\App\State;
+use Aspire\Module\Helper\Data;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientFactory;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ResponseFactory;
+use Magento\Framework\Webapi\Rest\Request;
+use Magento\Framework\Serialize\SerializerInterface;
+
+/**
+ * ApiResponse
+ */
 class ApiResponse extends AbstractHelper 
 {
-    const XML_CONFIGURATION_SETTING = 'module/configuration/enable';
-    const XML_CONFIGURATION_APIURL = 'module/configuration/api_url';
-    const XML_API_USERNAME = 'module/configuration/api_username';
-    const XML_API_PASSWORD = 'module/configuration/api_password';
+    /**
+     * API request endpoint
+     */
+    const API_REQUEST_ENDPOINT = '?email=';
+
+    /**
+     * @var ResponseFactory
+     */
+    protected $responseFactory;
+
+    /**
+     * @var ClientFactory
+     */
+    protected $clientFactory;
+
     /**
      * @var Context
      */
     protected $context;
-    /**
-     * @var Curl
-     */
-    protected $curl;
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
     /**
      * @var \Aspire\Module\Logger\Logger
      */
@@ -39,10 +52,6 @@ class ApiResponse extends AbstractHelper
      */
     protected $session;
     /**
-     * @var RedirectFactory
-     */
-    protected $resultRedirectFactory;
-    /**
      * @var CustomerRepositoryInterface
      */
     protected $customerRepository;
@@ -50,68 +59,113 @@ class ApiResponse extends AbstractHelper
      * @var State
      */
     protected $state;
-    public function __construct(Context $context, Curl $curl, ScopeConfigInterface $scopeConfig, Logger $logger, Session $session, CustomerRepositoryInterface $customerRepository, State $state, RedirectFactory $resultRedirectFactory) {
+    /**
+     * @var Data
+     */
+    protected $data;
+    /**
+     * @var SerializerInterface
+     */
+    protected $serializer;
+
+    /**
+     * @param Context $context
+     * @param Logger $logger
+     * @param Session $session
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param State $state
+     * @param Data $data
+    */
+    public function __construct(Context $context, Logger $logger, Session $session, CustomerRepositoryInterface $customerRepository, State $state, Data $data, ClientFactory $clientFactory, ResponseFactory $responseFactory, SerializerInterface $serializer) {
         parent::__construct($context);
-        $this->curl = $curl;
-        $this->scopeConfig = $scopeConfig;
         $this->_logger = $logger;
         $this->session = $session;
         $this->customerRepository = $customerRepository;
-        $this->resultRedirectFactory = $resultRedirectFactory;
         $this->state = $state;
+        $this->helper = $data;
+        $this->clientFactory = $clientFactory;
+        $this->responseFactory = $responseFactory;
+        $this->serializer = $serializer;
     }
+
+    /**
+     * @return int
+     */
     public function getApiResponse() {
         try {
             $this->_logger->info('Api Code Starts here---');
-            $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-            $apiUrl = $this->scopeConfig->getValue(self::XML_CONFIGURATION_APIURL, $storeScope);
-            $apiUsername = $this->scopeConfig->getValue(self::XML_API_USERNAME, $storeScope);
-            $apiPassword = $this->scopeConfig->getValue(self::XML_API_PASSWORD, $storeScope);
+            $apiUrl = $this->helper->getApiUrl();
+            $apiUsername = $this->helper->getApiUserName();
+            $apiPassword = $this->helper->getApiPassword();
             if ($this->session->isLoggedIn()) {
                 $customerDetail = $this->session->getData();
                 $customer = $this->getCustomer($customerDetail['customer_id']);
-                $url = $apiUrl . '?email=' . $customer->getEmail();
-                //set curl options
-                $this->curl->setOption(CURLOPT_USERPWD, $apiUsername . ":" . $apiPassword);
-                $this->curl->setOption(CURLOPT_HEADER, 0);
-                $this->curl->setOption(CURLOPT_TIMEOUT, 60);
-                $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
-                $this->curl->setOption(CURLOPT_CUSTOMREQUEST, 'GET');
-                //set curl header
-                $this->curl->addHeader("Content-Type", "application/json");
-                //get request with url
-                $request = $this->curl->get($url);
-                $this->_logger->info('API Request Log Here');
-                $this->_logger->info(print_r($request, true));
-                //read response
-                $response = $this->curl->getBody();
-                $this->_logger->info('API Response Log Here');
-                $this->_logger->info(print_r($response, true));
-                $data = json_decode($response, TRUE);
+                $response = $this->doRequest(static::API_REQUEST_ENDPOINT . $customer->getEmail());
+                $status = $response->getStatusCode(); // 200 status code
+                $responseBody = $response->getBody();
+                $responseContent = $responseBody->getContents();
+                $this->_logger->info('set get data------');
+                $this->_logger->info(print_r($responseContent, true));
+                $data = $this->serializer->unserialize($responseContent);
                 if ($data) {
                     $is_suspended = $data['result']['user_info']['is_suspended'];
+                    $this->_logger->info($is_suspended);
                     return $is_suspended;
                 }
-            } else {
-                //$resultRedirect = $this->resultRedirectFactory->create();
-                //$resultRedirect->setPath('customer/account/login/');
-                //return $resultRedirect;
-                
             }
         }
         catch(Exception $e) {
-            echo 'Exception Message: ' . $e->getMessage();
+            $this->_logger->error($e->getMessage(), ['exception' => $e]);
         }
     }
+
+    /**
+     * @return array
+     */
     public function getCustomer($id) {
         return $this->customerRepository->getById($id);
     }
+
+    /**
+     * @return string
+     */
     public function getArea() {
         return $this->state->getAreaCode();
     }
+
+    /**
+     * @return int
+     */
     public function getGroupId() {
         if ($this->session->isLoggedIn()) {
             return $this->session->getCustomer()->getGroupId();
         }
+    }
+    private function doRequest(
+        string $uriEndpoint,
+        array $params = [],
+        string $requestMethod = Request::HTTP_METHOD_GET
+    ): Response {
+        /** @var Client $client */
+        $apiUrl = $this->helper->getApiUrl();
+        $client = $this->clientFactory->create(['config' => [
+            'base_uri' => $apiUrl
+        ]]);
+
+        try {
+            $response = $client->request(
+                $requestMethod,
+                $uriEndpoint,
+                $params
+            );
+        } catch (GuzzleException $exception) {
+            /** @var Response $response */
+            $response = $this->responseFactory->create([
+                'status' => $exception->getCode(),
+                'reason' => $exception->getMessage()
+            ]);
+        }
+
+        return $response;
     }
 }

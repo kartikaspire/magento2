@@ -5,24 +5,44 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Customer;
 use Aspire\Module\Block\Adminhtml\ApiCall;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Aspire\Module\Helper\Data;
+
 class HandleStatus
 {
-    const XML_CRON_ENABLE = 'module/configurable_cron/enable';
+    /**
+     * @var CustomerRepositoryInterface
+    */
     protected $customerRepositoryInterface;
+    /**
+     * @var Customer
+    */
     protected $customerCollection;
+    /**
+     * @var ApiCall
+    */
     protected $apiCall;
-    protected $scopeConfig;
+    /**
+     * @var Data
+    */
+    protected $data;
+
+    /**
+     * @param CustomerRepositoryInterface $customerRepositoryInterface
+     * @param Customer $customerCollection
+     * @param ApiCall $apiCall
+     * @param Data $data
+    */
     public function __construct(
       CustomerRepositoryInterface $customerRepositoryInterface,
       Customer $customerCollection,
       ApiCall $apiCall,
-      ScopeConfigInterface $scopeConfig
+      Data $data
     ) {
       $this->customerRepositoryInterface = $customerRepositoryInterface;
       $this->customerCollection = $customerCollection;
       $this->apiCall = $apiCall;
-      $this->scopeConfig = $scopeConfig;
-      $this->enableCron = $this->scopeConfig->getValue(self::XML_CRON_ENABLE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+      $this->helper = $data;
+      $this->enableCron = $this->helpe->isCronEnabled();
     }
     public function execute()
     {

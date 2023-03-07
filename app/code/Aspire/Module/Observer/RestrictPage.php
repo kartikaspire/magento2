@@ -5,19 +5,15 @@ namespace Aspire\Module\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Aspire\Module\Logger\Logger;
 use Magento\Customer\Model\Context;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer;
-use Magento\Framework\Serialize\SerializerInterface;
 use Aspire\Module\Helper\ApiResponse;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\App\ResponseFactory;
 use Magento\Customer\Model\Session;
+use Aspire\Module\Helper\Data;
 
 class RestrictPage implements ObserverInterface 
 {
-    const XML_CONFIGURATION_BLOCK_PAGE = 'module/configuration/pages';
-    const XML_CONFIGURATION_ENABLE = 'module/configuration/enable';
-    const XML_CONFIGURATION_USER_GROUP_BLOCK = 'module/configuration/customer_group_list';
     const FRONTEND = 'frontend';
     /**
      * @var \Aspire\Module\Logger\Logger
@@ -28,10 +24,8 @@ class RestrictPage implements ObserverInterface
      */
     protected $context;
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
-    protected $serializer;
+     * @var ApiResponse
+    */
     protected $apiResponse;
     /**
      * @var \Magento\Framework\UrlInterface
@@ -45,16 +39,30 @@ class RestrictPage implements ObserverInterface
      * @var Session
      */
     protected $session;
-    public function __construct(Logger $logger, Context $context, ScopeConfigInterface $scopeConfig, SerializerInterface $serializer, ApiResponse $apiResponse, UrlInterface $url, ResponseFactory $responseFactory, Session $session) {
-        $this->scopeConfig = $scopeConfig;
+    /**
+     * @var Data
+     */
+    protected $data;
+
+    /**
+     * @param Logger $logger
+     * @param Context $context
+     * @param ApiResponse $apiResponse
+     * @param UrlInterface $url
+     * @param ResponseFactory $responseFactory
+     * @param Session $session
+     * @param Data $data
+    */
+    public function __construct(Logger $logger, Context $context, ApiResponse $apiResponse, UrlInterface $url, ResponseFactory $responseFactory, Session $session, Data $data) {
         $this->_logger = $logger;
-        $this->serializer = $serializer;
         $this->apiResponse = $apiResponse;
         $this->url = $url;
         $this->session = $session;
-        $this->enableModule = $this->scopeConfig->getValue(self::XML_CONFIGURATION_ENABLE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        $this->blockCustomerGroup = $this->scopeConfig->getValue(self::XML_CONFIGURATION_USER_GROUP_BLOCK, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $this->helper = $data;
         $this->responseFactory = $responseFactory;
+        $this->enableModule = $this->helper->isEnabled();
+        $this->blockCustomerGroup = $this->helper->getBlockCustomerGroup();
+        $this->blockCustomerPages = $this->helper->getBlockPages();
     }
     /**
      * @param Observer $observer
@@ -64,8 +72,6 @@ class RestrictPage implements ObserverInterface
         try {
             if ($this->apiResponse->getArea() == self::FRONTEND) {
                 if ($this->enableModule == 1) {
-                    $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-                    $pageValue = $this->scopeConfig->getValue(self::XML_CONFIGURATION_BLOCK_PAGE, $storeScope);
                     $apiStatusValue = $this->apiResponse->getApiResponse();
                     $customerDetail = $this->session->getData();
                     $this->_logger->info('Page Restrict Starts here');
@@ -75,8 +81,7 @@ class RestrictPage implements ObserverInterface
                         $this->_logger->info('admin_customer_status');
                         $this->_logger->info($admin_customer_status);
                         if (($apiStatusValue == 0) && (($admin_customer_status == 0) || ($admin_customer_status == ''))) {
-                            $this->_logger->info('admin_customer_status-----');
-                            $pageOptionArray = explode(',', $pageValue);
+                            $pageOptionArray = explode(',', $this->blockCustomerPages);
                             $fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
                             $customerGroupIdArray = explode(',', $this->blockCustomerGroup);
                             $customerGroupId = $this->apiResponse->getGroupId();
@@ -92,7 +97,7 @@ class RestrictPage implements ObserverInterface
             }
         }
         catch(Exception $e) {
-            echo 'Exception Message: ' . $e->getMessage();
+            $this->_logger->error($e->getMessage(), ['exception' => $e]);
         }
     }
 }
