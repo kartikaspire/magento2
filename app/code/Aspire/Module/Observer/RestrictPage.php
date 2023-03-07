@@ -71,10 +71,11 @@ class RestrictPage implements ObserverInterface
                     $this->_logger->info('Page Restrict Starts here');
                     if (array_key_exists("customer_id", $customerDetail)) {
                         $customerData = $this->apiResponse->getCustomer($customerDetail['customer_id']);
-                        $admin_customer_status = $customerData->getCustomAttribute('customer_apistatus')->getValue();
+                        $admin_customer_status = ($customerData->getCustomAttribute('customer_apistatus') != '') ? $customerData->getCustomAttribute('customer_apistatus')->getValue() : '';
                         $this->_logger->info('admin_customer_status');
                         $this->_logger->info($admin_customer_status);
-                        if ($admin_customer_status == 0 || $apiStatusValue == 0) {
+                        if (($apiStatusValue == 0) && (!in_array($admin_customer_status, range(1, 2)))) {
+                            $this->_logger->info('admin_customer_status-----');
                             $pageOptionArray = explode(',', $pageValue);
                             $fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
                             $customerGroupIdArray = explode(',', $this->blockCustomerGroup);

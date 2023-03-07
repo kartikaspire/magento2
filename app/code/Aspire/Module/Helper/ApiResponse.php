@@ -65,8 +65,6 @@ class ApiResponse extends AbstractHelper
             $this->_logger->info('Api Code Starts here---');
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
             $apiUrl = $this->scopeConfig->getValue(self::XML_CONFIGURATION_APIURL, $storeScope);
-            $this->_logger->info('API Url');
-            $this->_logger->info($apiUrl);
             $apiUsername = $this->scopeConfig->getValue(self::XML_API_USERNAME, $storeScope);
             $apiPassword = $this->scopeConfig->getValue(self::XML_API_PASSWORD, $storeScope);
             if ($this->session->isLoggedIn()) {
@@ -90,7 +88,6 @@ class ApiResponse extends AbstractHelper
                 $this->_logger->info('API Response Log Here');
                 $this->_logger->info(print_r($response, true));
                 $data = json_decode($response, TRUE);
-                $this->_logger->info(print_r($data, true));
                 if ($data) {
                     $is_suspended = $data['result']['user_info']['is_suspended'];
                     return $is_suspended;
