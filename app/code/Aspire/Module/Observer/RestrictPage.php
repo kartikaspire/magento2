@@ -74,7 +74,7 @@ class RestrictPage implements ObserverInterface
                         $admin_customer_status = ($customerData->getCustomAttribute('customer_apistatus') != '') ? $customerData->getCustomAttribute('customer_apistatus')->getValue() : '';
                         $this->_logger->info('admin_customer_status');
                         $this->_logger->info($admin_customer_status);
-                        if (($apiStatusValue == 0) && (!in_array($admin_customer_status, range(1, 2)))) {
+                        if (($apiStatusValue == 0) && (($admin_customer_status == 0) || ($admin_customer_status == ''))) {
                             $this->_logger->info('admin_customer_status-----');
                             $pageOptionArray = explode(',', $pageValue);
                             $fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
