@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="aspire" translate="label" sortOrder="10">
+            <label>Aspire Module</label>
+        </tab>
+        <section id="module" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Aspire Admin Configuration</label>
+            <tab>aspire</tab>
+            <resource>Aspire_Module::config_extension</resource>
+            <group id="configuration" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Configuration</label>
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Module Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_url" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>API Endpoint</label>
+                </field>
+                <field id="api_username" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>API Username</label>
+                </field>
+                <field id="api_password" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>API Password</label>
+                </field>
+                <field id="pages" translate="label" type="multiselect" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Pages to Block</label>
+                    <source_model>Aspire\Module\Model\Config\Source\ConfigOption</source_model>
+                </field>
+                <field id="customer_group_list" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customer Groups to Block</label>
+                    <source_model>Aspire\Module\Model\Adminhtml\System\Config\Source\Customer\Group</source_model>
+                </field>
+            </group>
+            <group id="configurable_cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Cron Settings</label>
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cron Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="time" translate="label comment" sortOrder="2" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
