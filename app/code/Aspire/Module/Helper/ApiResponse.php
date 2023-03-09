@@ -10,7 +10,6 @@ use Magento\Customer\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\State;
 use Aspire\Module\Helper\Data;
-
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientFactory;
 use GuzzleHttp\Exception\GuzzleException;
@@ -91,20 +90,19 @@ class ApiResponse extends AbstractHelper
     /**
      * @return int
      */
-    public function getApiResponse() {
+    public function getApiResponse($id) {
         try {
             $this->_logger->info('Api Code Starts here---');
             $apiUrl = $this->helper->getApiUrl();
             $apiUsername = $this->helper->getApiUserName();
             $apiPassword = $this->helper->getApiPassword();
-            if ($this->session->isLoggedIn()) {
-                $customerDetail = $this->session->getData();
-                $customer = $this->getCustomer($customerDetail['customer_id']);
-                $response = $this->doRequest(static::API_REQUEST_ENDPOINT . $customer->getEmail());
-                $status = $response->getStatusCode(); // 200 status code
-                $responseBody = $response->getBody();
-                $responseContent = $responseBody->getContents();
-                $this->_logger->info('set get data------');
+            $customer = $this->getCustomer($id);
+            $response = $this->doRequest(static::API_REQUEST_ENDPOINT . $customer->getEmail());
+            $status = $response->getStatusCode(); // 200 status code
+            $responseBody = $response->getBody();
+            $responseContent = $responseBody->getContents();
+            if (!empty($responseContent)) {
+                $this->_logger->info('Response Body');
                 $this->_logger->info(print_r($responseContent, true));
                 $data = $this->serializer->unserialize($responseContent);
                 if ($data) {

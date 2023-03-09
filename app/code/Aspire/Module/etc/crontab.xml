@@ -3,7 +3,6 @@
     <group id="aspire_cron_group">
         <job name="aspire_cron" instance="Aspire\Module\Cron\HandleStatus" method="execute">
             <config_path>module/configurable_cron/time</config_path>
-            <!--<schedule>* * * * *</schedule>-->
         </job>
     </group>
 </config>

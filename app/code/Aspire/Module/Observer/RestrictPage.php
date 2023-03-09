@@ -12,6 +12,9 @@ use Magento\Framework\App\ResponseFactory;
 use Magento\Customer\Model\Session;
 use Aspire\Module\Helper\Data;
 
+/**
+ * Observer for Restrictpage
+ */
 class RestrictPage implements ObserverInterface 
 {
     const FRONTEND = 'frontend';
@@ -72,10 +75,10 @@ class RestrictPage implements ObserverInterface
         try {
             if ($this->apiResponse->getArea() == self::FRONTEND) {
                 if ($this->enableModule == 1) {
-                    $apiStatusValue = $this->apiResponse->getApiResponse();
                     $customerDetail = $this->session->getData();
                     $this->_logger->info('Page Restrict Starts here');
                     if (array_key_exists("customer_id", $customerDetail)) {
+                        $apiStatusValue = $this->apiResponse->getApiResponse($customerDetail['customer_id']);
                         $customerData = $this->apiResponse->getCustomer($customerDetail['customer_id']);
                         $admin_customer_status = ($customerData->getCustomAttribute('customer_apistatus') != '') ? $customerData->getCustomAttribute('customer_apistatus')->getValue() : '';
                         $this->_logger->info('admin_customer_status');

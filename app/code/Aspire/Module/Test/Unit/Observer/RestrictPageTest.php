@@ -1,14 +1,15 @@
 <?php
-namespace Aspire\Module\Test\Unit\Helper;
+namespace Aspire\Module\Test\Unit\Observer;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager as ObjectManagerHelper;
+//use Aspire\Module\Observer\RestrictPage;
 
-class ApiResponseTest extends \PHPUnit\Framework\TestCase
+class RestrictPageTest extends \PHPUnit\Framework\TestCase
 {
 	/**
-     * @var string
+     * @var RestrictPage
      */
-    protected $apiResponseTest;
+    protected $object;
 
     /**
      * Set up
@@ -18,7 +19,7 @@ class ApiResponseTest extends \PHPUnit\Framework\TestCase
     protected function setUp() :void
     {
         $objectManagerHelper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $className = \Aspire\Module\Helper\ApiResponse::class;
+        $className = \Aspire\Module\Observer\RestrictPage::class;
         $arguments = $objectManagerHelper->getConstructArguments($className);
         /*$this->context = $arguments['context'];*/
 
@@ -28,12 +29,9 @@ class ApiResponseTest extends \PHPUnit\Framework\TestCase
     /**
      * @return void
     */
-    public function testApiResponse() :void
+    public function testExecute() :void
     {
-        $this->apiResponse = array("0"=>0, "1" =>1, "2" => 2);  
-        // assert function to test whether 'value' is a value of array 
-        $this->assertContains(0, $this->apiResponse, "testArray doesn't contains number as number") ;
-        $this->assertTrue(true);        
+        
     }
 }
 ?>

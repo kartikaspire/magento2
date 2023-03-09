@@ -2,6 +2,9 @@
 
 namespace Aspire\Module\Model\Adminhtml\System\Config\Source\Customer;
 
+/**
+ * Customer Group
+ */
 class Group implements \Magento\Framework\Option\ArrayInterface
 {
 	protected $_options; 

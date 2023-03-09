@@ -6,6 +6,9 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 
+/**
+ * Helper Data
+ */
 class Data extends AbstractHelper
 {
     const CONFIGURATION_ENABLE = 'module/configuration/enable';

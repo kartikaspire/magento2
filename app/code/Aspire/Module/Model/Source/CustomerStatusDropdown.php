@@ -1,7 +1,10 @@
 <?php
  
 namespace Aspire\Module\Model\Source;
- 
+
+/**
+ * CustomerStatusDropdown Selection
+ */
 class CustomerStatusDropdown extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource 
 {
     public function getAllOptions() 

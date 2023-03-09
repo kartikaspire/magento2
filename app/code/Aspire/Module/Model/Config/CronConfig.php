@@ -7,12 +7,12 @@ class CronConfig extends \Magento\Framework\App\Config\Value
     /**
      * Cron string path constant
      */
-    const CRON_STRING_PATH = 'crontab/default/jobs/aspire_cron_group/schedule/cron_expr';
+    const CRON_STRING_PATH = 'crontab/default/jobs/aspire_cron/schedule/cron_expr';
 
     /**
      * Cron model path constant
      */
-    const CRON_MODEL_PATH = 'crontab/default/jobs/aspire_cron_group/run/model';
+    const CRON_MODEL_PATH = 'crontab/default/jobs/aspire_cron/run/model';
 
     /**
      * @var \Magento\Framework\App\Config\ValueFactory

@@ -4,7 +4,9 @@ namespace Aspire\Module\Model\Config\Source;
 
 use Magento\Framework\Data\OptionSourceInterface;
 
-
+/**
+ * Page Options
+ */
 class ConfigOption implements OptionSourceInterface
 {
     public function toOptionArray()
