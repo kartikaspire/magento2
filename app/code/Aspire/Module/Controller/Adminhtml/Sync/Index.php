@@ -9,7 +9,7 @@ use Magento\Framework\View\Result\PageFactory;
 use Magento\Ui\Component\MassAction\Filter;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Controller\ResultFactory;
-use Aspire\Module\Logger\CronLogger;
+use Aspire\Module\Logger\Logger;
 use Aspire\Module\Helper\ApiResponse;
 
 /**
@@ -30,9 +30,9 @@ class Index extends Action
     */
     protected $customerRepositoryInterface;
     /**
-     * @var CronLogger
-    */
-    protected $cronLogger;
+     * @var \Aspire\Module\Logger\Logger
+     */
+    protected $_logger;
     /**
       * @var \Magento\Framework\App\Config\ScopeConfigInterface
     */
@@ -49,6 +49,7 @@ class Index extends Action
      * @param CollectionFactory $CollectionFactory
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param ApiResponse $apiResponse
+     * @param Logger $logger
     */
     public function __construct(
         Context $context,
@@ -56,14 +57,14 @@ class Index extends Action
         Filter $filter,
         CollectionFactory $CollectionFactory,
         CustomerRepositoryInterface $customerRepositoryInterface,
-        CronLogger $cronLogger,
+        Logger $logger,
         ApiResponse $apiResponse
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->CollectionFactory = $CollectionFactory;
         $this->filter = $filter;
         $this->customerRepositoryInterface = $customerRepositoryInterface;
-        $this->cronLogger = $cronLogger;
+        $this->_logger = $logger;
         $this->apiResponse = $apiResponse;
         parent::__construct($context);
     }
@@ -79,7 +80,12 @@ class Index extends Action
                     $result = $this->apiResponse->getApiResponse($child->getData('entity_id'));
                     $customer = $this->customerRepositoryInterface->getById($child->getData('entity_id'));
                     $customer->setCustomAttribute('customer_apistatus', $result);
-                    $this->customerRepositoryInterface->save($customer); 
+                    $saveCustomer = $this->customerRepositoryInterface->save($customer);
+                    if ($saveCustomer) {
+                        $this->_logger->info('Your Records Synchronized Successfull for '.$child->getData('email'));
+                    } else {
+                        $this->_logger->info('Your Records not Synchronized Successfull for '.$child->getData('email'));  
+                    }
                 }
             }
             $this->messageManager->addSuccess(__('Your Records Synchronized Successfully'));
@@ -87,7 +93,7 @@ class Index extends Action
             $resultRedirect->setUrl($this->_redirect->getRefererUrl());
             return $resultRedirect;
         } catch(Exception $e) {
-            $this->cronLogger->error($e->getMessage(), ['exception' => $e]);
+            $this->_logger->error($e->getMessage(), ['exception' => $e]);
         }
     }
 }

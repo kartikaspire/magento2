@@ -17,20 +17,41 @@
                 </field>
                 <field id="api_url" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>API Endpoint</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
                 <field id="api_username" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>API Username</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
-                <field id="api_password" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="1">
+                <field id="api_password" translate="label" type="password" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>API Password</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
                 <field id="pages" translate="label" type="multiselect" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="1">
                     <label>Pages to Block</label>
                     <source_model>Aspire\Module\Model\Config\Source\ConfigOption</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
                 <field id="customer_group_list" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Customer Groups to Block</label>
-                    <source_model>Aspire\Module\Model\Adminhtml\System\Config\Source\Customer\Group</source_model>
+                    <source_model>Magento\Customer\Model\Customer\Source\Group</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="suspended_message" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Suspended Message</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
             </group>
             <group id="configurable_cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -41,6 +62,9 @@
                 </field>
                 <field id="time" translate="label comment" sortOrder="2" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Start Time</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

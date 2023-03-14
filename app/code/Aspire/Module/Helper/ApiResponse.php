@@ -6,7 +6,6 @@ namespace Aspire\Module\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Aspire\Module\Logger\Logger;
 use Magento\Framework\App\Helper\Context;
-use Magento\Customer\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\State;
 use Aspire\Module\Helper\Data;
@@ -47,10 +46,6 @@ class ApiResponse extends AbstractHelper
      */
     protected $_logger;
     /**
-     * @var Session
-     */
-    protected $session;
-    /**
      * @var CustomerRepositoryInterface
      */
     protected $customerRepository;
@@ -70,15 +65,13 @@ class ApiResponse extends AbstractHelper
     /**
      * @param Context $context
      * @param Logger $logger
-     * @param Session $session
      * @param CustomerRepositoryInterface $customerRepository
      * @param State $state
      * @param Data $data
     */
-    public function __construct(Context $context, Logger $logger, Session $session, CustomerRepositoryInterface $customerRepository, State $state, Data $data, ClientFactory $clientFactory, ResponseFactory $responseFactory, SerializerInterface $serializer) {
+    public function __construct(Context $context, Logger $logger, CustomerRepositoryInterface $customerRepository, State $state, Data $data, ClientFactory $clientFactory, ResponseFactory $responseFactory, SerializerInterface $serializer) {
         parent::__construct($context);
         $this->_logger = $logger;
-        $this->session = $session;
         $this->customerRepository = $customerRepository;
         $this->state = $state;
         $this->helper = $data;
@@ -87,12 +80,22 @@ class ApiResponse extends AbstractHelper
         $this->serializer = $serializer;
     }
 
+    protected function _construct()
+    {
+        $this->_init(
+            \Tiny\ProductCustomization\Model\Product::class,
+            \Tiny\ProductCustomization\Model\ResourceModel\Product::class,
+        );
+
+        parent::_construct();
+    }
+
     /**
      * @return int
      */
     public function getApiResponse($id) {
         try {
-            $this->_logger->info('Api Code Starts here---');
+            $this->_logger->info('Api Code Starts here');
             $apiUrl = $this->helper->getApiUrl();
             $apiUsername = $this->helper->getApiUserName();
             $apiPassword = $this->helper->getApiPassword();
@@ -102,14 +105,19 @@ class ApiResponse extends AbstractHelper
             $responseBody = $response->getBody();
             $responseContent = $responseBody->getContents();
             if (!empty($responseContent)) {
-                $this->_logger->info('Response Body');
+                $this->_logger->info('Response Success Body');
                 $this->_logger->info(print_r($responseContent, true));
                 $data = $this->serializer->unserialize($responseContent);
                 if ($data) {
-                    $is_suspended = $data['result']['user_info']['is_suspended'];
+                    $is_suspended = $data['result']['user_info']['is_suspended'] ?? null;
+                    $customer->setGroupId(4);
+                    $this->customerRepository->save($customer);
                     $this->_logger->info($is_suspended);
                     return $is_suspended;
                 }
+            } else {
+                $this->_logger->info('Response Failure Body');
+                $this->_logger->info(print_r($responseContent, true));
             }
         }
         catch(Exception $e) {
@@ -131,14 +139,6 @@ class ApiResponse extends AbstractHelper
         return $this->state->getAreaCode();
     }
 
-    /**
-     * @return int
-     */
-    public function getGroupId() {
-        if ($this->session->isLoggedIn()) {
-            return $this->session->getCustomer()->getGroupId();
-        }
-    }
     private function doRequest(
         string $uriEndpoint,
         array $params = [],

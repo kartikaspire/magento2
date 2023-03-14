@@ -5,6 +5,7 @@ namespace Aspire\Module\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Customer\Model\Session;
 
 /**
  * Helper Data
@@ -17,24 +18,30 @@ class Data extends AbstractHelper
     const API_PASSWORD = 'module/configuration/api_password';
     const CONFIGURATION_BLOCK_PAGE = 'module/configuration/pages';
     const CONFIGURATION_USER_GROUP_BLOCK = 'module/configuration/customer_group_list';
+    const CONFIGURATION_SUSPENDED_MESSAGE = 'module/configuration/suspended_message';
     const CRON_ENABLE = 'module/configurable_cron/enable';
 
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     protected $scopeConfig;
-
+    /**
+     * @var Session
+     */
+    protected $session;
     /**
      * @param Context $context
      * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         Context $context,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        Session $session
     )
     {
         parent::__construct($context);
         $this->scopeConfig = $scopeConfig;
+        $this->session = $session;
     }
 
     /*
@@ -91,5 +98,22 @@ class Data extends AbstractHelper
     public function isCronEnabled()
     {
         return $this->scopeConfig->getValue(self::CRON_ENABLE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+    /*
+     * @return string
+     */
+    public function getSuspendedMessage()
+    {
+        return $this->scopeConfig->getValue(self::CONFIGURATION_SUSPENDED_MESSAGE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+    /*
+     * @return int
+     */
+    public function getGroupId() {
+        if ($this->session->isLoggedIn()) {
+            return $this->session->getCustomer()->getGroupId();
+        }
     }
 }
