@@ -1,0 +1,113 @@
+<?php
+
+namespace Aspire\Module\Observer;
+
+use Magento\Framework\Event\ObserverInterface;
+use Aspire\Module\Logger\Logger;
+use Magento\Customer\Model\Context;
+use Magento\Framework\Event\Observer;
+use Aspire\Module\Helper\ApiResponse;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\App\ResponseFactory;
+use Magento\Customer\Model\Session;
+use Aspire\Module\Helper\Data;
+use Magento\Framework\Message\ManagerInterface;
+
+/**
+ * Observer for Restrictpage
+ */
+class RestrictPage implements ObserverInterface 
+{
+    /**
+     * @var \Aspire\Module\Logger\Logger
+     */
+    protected $_logger;
+    /**
+     * @var Context
+     */
+    protected $context;
+    /**
+     * @var ApiResponse
+    */
+    protected $apiResponse;
+    /**
+     * @var \Magento\Framework\UrlInterface
+     */
+    protected $url;
+    /**
+     * @var \Magento\Framework\App\ResponseFactory
+     */
+    protected $responseFactory;
+    /**
+     * @var Session
+     */
+    protected $session;
+    /**
+     * @var Data
+     */
+    protected $data;
+    /**
+     * @var ManagerInterface
+     */
+    protected $messageManager;
+
+    /**
+     * @param Logger $logger
+     * @param Context $context
+     * @param ApiResponse $apiResponse
+     * @param UrlInterface $url
+     * @param ResponseFactory $responseFactory
+     * @param Session $session
+     * @param Data $data
+     * @param ManagerInterface $_messageManager
+    */
+    public function __construct(Logger $logger, Context $context, ApiResponse $apiResponse, UrlInterface $url, ResponseFactory $responseFactory, Session $session, Data $data, ManagerInterface $messageManager) {
+        $this->_logger = $logger;
+        $this->apiResponse = $apiResponse;
+        $this->url = $url;
+        $this->session = $session;
+        $this->helper = $data;
+        $this->responseFactory = $responseFactory;
+        $this->enableModule = $this->helper->isEnabled();
+        $this->blockCustomerGroup = $this->helper->getBlockCustomerGroup();
+        $this->blockCustomerPages = $this->helper->getBlockPages();
+        $this->suspendedMessage = $this->helper->getSuspendedMessage();
+        $this->messageManager = $messageManager;
+    }
+    /**
+     * @param Observer $observer
+     * @return void
+     */
+    public function execute(Observer $observer) {
+        try {
+             if ($this->enableModule == 1) {
+                 $customerDetail = $this->session->getData();
+                 $this->_logger->info('Page Restrict Starts here');
+                 if (array_key_exists("customer_id", $customerDetail)) {
+                     $apiStatusValue = $this->apiResponse->getApiResponse($customerDetail['customer_id']);
+                     $customerData = $this->apiResponse->getCustomer($customerDetail['customer_id']);
+                     $admin_customer_status = ($customerData->getCustomAttribute('customer_apistatus') != '') ? $customerData->getCustomAttribute('customer_apistatus')->getValue() : '';
+                     $this->_logger->info('admin_customer_status');
+                     $this->_logger->info($admin_customer_status);
+                     if (($apiStatusValue == 0) && (($admin_customer_status == 0) || ($admin_customer_status == ''))) {
+                         $pageOptionArray = explode(',', $this->blockCustomerPages);
+                         $fullPageName = $observer->getEvent()->getRequest()->getFullActionName();
+                         $customerGroupIdArray = explode(',', $this->blockCustomerGroup);
+                         $customerGroupId = $this->helper->getGroupId();
+                         if (in_array($fullPageName, $pageOptionArray) && in_array($customerGroupId, $customerGroupIdArray)) {
+                             $redirectionUrl = $this->url->getUrl();
+                             //$this->messageManager->addSuccessMessage($this->suspendedMessage);
+                             $redirectController = $observer->getControllerAction();
+                             $redirectController->getResponse()->setRedirect($redirectionUrl);
+                             $this->messageManager->addSuccess('success message');
+                             return $this;
+                         }
+                     }
+                 }
+             }
+        }
+        catch(Exception $e) {
+            $this->_logger->error($e->getMessage(), ['exception' => $e]);
+        }
+    }
+}

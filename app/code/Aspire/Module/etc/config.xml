@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <module>
+            <configuration>
+                <enable>1</enable>
+                <api_url>https://c90105daas001.azurewebsites.net/trade-ally/api/v1/user-info</api_url>
+                <api_username>api_user</api_username>
+                <api_password>apiuser@123</api_password>
+                <pages>Category</pages>
+                <customer_group_list>General</customer_group_list>
+                <suspended_message>You have blocked to access the page.</suspended_message>
+            </configuration>
+            <configurable_cron>
+                <enable>1</enable>
+            </configurable_cron>
+            <time>
+                <!-- Every day at midnight -->
+                <schedule>0 0 * * *</schedule>
+            </time>
+        </module>
+    </default>
+</config>
